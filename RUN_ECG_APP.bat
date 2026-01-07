@@ -1,6 +1,6 @@
 @echo off
 echo 正在启动 ECG 监护系统...
-cd /d "%~dp0build\debug"
+cd /d "%~dp0build_cmake"
 if exist ecg_app.exe (
     start "" ecg_app.exe
 ) else (

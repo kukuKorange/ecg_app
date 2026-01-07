@@ -1,10 +1,8 @@
 #pragma once
 #include <QObject>
-#include "VitalSignData.h"
-
-#ifndef NO_MQTT_SUPPORT
 #include <QMqttClient>
 #include <QMqttSubscription>
+#include "VitalSignData.h"
 
 class MqttClientManager : public QObject {
     Q_OBJECT
@@ -62,30 +60,3 @@ private:
     void parseVitalSignData(const QByteArray& data);
     void parseAlarmData(const QByteArray& data);
 };
-
-#else // NO_MQTT_SUPPORT
-
-// 当 MQTT 支持被禁用时，提供一个空的存根类
-class MqttClientManager : public QObject {
-    Q_OBJECT
-
-public:
-    explicit MqttClientManager(QObject* parent = nullptr) : QObject(parent) {}
-    ~MqttClientManager() {}
-
-    void connectToHost(const QString& /*host*/, quint16 /*port*/ = 1883) {}
-    void setAuthentication(const QString& /*username*/, const QString& /*password*/) {}
-    void subscribeTopic(const QString& /*topic*/) {}
-    void unsubscribeTopic(const QString& /*topic*/) {}
-    void publishMessage(const QString& /*topic*/, const QByteArray& /*message*/) {}
-    void disconnectFromHost() {}
-    bool isConnected() const { return false; }
-
-signals:
-    void vitalSignReceived(const VitalSignData& data);
-    void alarmReceived(const AlarmInfo& alarm);
-    void connectionStateChanged(bool connected);
-    void errorOccurred(const QString& error);
-};
-
-#endif // NO_MQTT_SUPPORT

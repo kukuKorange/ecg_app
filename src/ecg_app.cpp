@@ -15,16 +15,32 @@
 ecg_app::ecg_app(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui_ecg_app)
-    , m_mqttHost("localhost")
+    , m_mqttHost("47.115.148.200")
     , m_mqttPort(1883)
     , m_cloudServerUrl("https://ecg-cloud.com")
 {
+    qDebug() << "ecg_app: Constructor starting...";
+    qDebug() << "ecg_app: Setting up UI...";
     ui->setupUi(this);
+    qDebug() << "ecg_app: UI setup complete";
     
+    qDebug() << "initializeModules: Starting...";
     initializeModules();
+    qDebug() << "initializeModules: Complete";
+    
+    qDebug() << "setupUI: Starting...";
     setupUI();
+    qDebug() << "setupUI: Complete";
+    
+    qDebug() << "connectSignals: Starting...";
     connectSignals();
+    qDebug() << "connectSignals: Complete";
+    
+    qDebug() << "loadSettings: Starting...";
     loadSettings();
+    qDebug() << "loadSettings: Complete";
+    
+    qDebug() << "ecg_app: Constructor completed successfully";
 }
 
 ecg_app::~ecg_app()
@@ -34,25 +50,43 @@ ecg_app::~ecg_app()
 }
 
 void ecg_app::initializeModules() {
+    qDebug() << "initializeModules: Creating MqttClientManager...";
 #ifndef NO_MQTT_SUPPORT
     // 初始化MQTT客户端
     m_mqttClient = new MqttClientManager(this);
+    qDebug() << "initializeModules: MqttClientManager created";
 #endif
     
+    qDebug() << "initializeModules: Creating DatabaseManager...";
     // 初始化数据库
     m_database = new DatabaseManager(this);
+    qDebug() << "initializeModules: Initializing database...";
     m_database->initialize();
+    qDebug() << "initializeModules: Database initialized";
     
+    qDebug() << "initializeModules: Creating CloudSyncManager...";
     // 初始化云同步
     m_cloudSync = new CloudSyncManager(this);
     m_cloudSync->setServerUrl(m_cloudServerUrl);
     m_cloudSync->enableAutoSync(true, 5); // 每5分钟自动同步
+    qDebug() << "initializeModules: CloudSyncManager created";
     
+    qDebug() << "initializeModules: Creating ChartWidget (realtime)...";
     // 初始化UI组件
     m_realtimeChart = new ChartWidget(this);
+    qDebug() << "initializeModules: ChartWidget (realtime) created";
+    
+    qDebug() << "initializeModules: Creating ECGWaveformWidget...";
     m_ecgWaveform = new ECGWaveformWidget(this);
+    qDebug() << "initializeModules: ECGWaveformWidget created";
+    
+    qDebug() << "initializeModules: Creating VitalSignPanel...";
     m_vitalSignPanel = new VitalSignPanel(this);
+    qDebug() << "initializeModules: VitalSignPanel created";
+    
+    qDebug() << "initializeModules: Creating ChartWidget (history)...";
     m_historyChart = new ChartWidget(this);
+    qDebug() << "initializeModules: ChartWidget (history) created";
 }
 
 void ecg_app::setupUI() {

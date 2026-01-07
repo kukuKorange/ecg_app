@@ -8,32 +8,59 @@
 
 ChartWidget::ChartWidget(QWidget* parent)
     : QWidget(parent)
-    , m_chart(new QChart())
-    , m_chartView(new QChartView(m_chart, this))
+    , m_chart(nullptr)
+    , m_chartView(nullptr)
     , m_currentMode(RealTimeECG)
     , m_maxDataPoints(1000)
     , m_currentDataCount(0)
 {
-    initializeChart();
+    qDebug() << "ChartWidget: Constructor - Start";
     
-    QVBoxLayout* layout = new QVBoxLayout(this);
-    layout->addWidget(m_chartView);
-    layout->setContentsMargins(0, 0, 0, 0);
-    setLayout(layout);
+    try {
+        qDebug() << "ChartWidget: Creating QChart...";
+        m_chart = new QChart();
+        qDebug() << "ChartWidget: QChart created successfully";
+        
+        qDebug() << "ChartWidget: Creating QChartView...";
+        m_chartView = new QChartView(m_chart, this);
+        qDebug() << "ChartWidget: QChartView created successfully";
+        
+        qDebug() << "ChartWidget: Calling initializeChart()...";
+        initializeChart();
+        qDebug() << "ChartWidget: initializeChart() completed";
+        
+        qDebug() << "ChartWidget: Creating layout...";
+        QVBoxLayout* layout = new QVBoxLayout(this);
+        layout->addWidget(m_chartView);
+        layout->setContentsMargins(0, 0, 0, 0);
+        setLayout(layout);
+        qDebug() << "ChartWidget: Constructor completed successfully";
+    } catch (const std::exception& e) {
+        qCritical() << "ChartWidget: Exception in constructor:" << e.what();
+        throw;
+    } catch (...) {
+        qCritical() << "ChartWidget: Unknown exception in constructor";
+        throw;
+    }
 }
 
 ChartWidget::~ChartWidget() {
 }
 
 void ChartWidget::initializeChart() {
+    qDebug() << "ChartWidget::initializeChart - Start";
+    
+    qDebug() << "ChartWidget::initializeChart - Setting chart title...";
     m_chart->setTitle("实时心电图");
     m_chart->setAnimationOptions(QChart::NoAnimation);
     m_chartView->setRenderHint(QPainter::Antialiasing);
     
+    qDebug() << "ChartWidget::initializeChart - Creating ECG series...";
     // 初始化ECG波形
     m_ecgSeries = new QLineSeries();
     m_ecgSeries->setName("ECG");
     
+    qDebug() << "ChartWidget::initializeChart - Creating ECG axes...";
     m_ecgAxisX = new QValueAxis();
     m_ecgAxisX->setTitleText("时间 (s)");
     m_ecgAxisX->setRange(0, 10);
@@ -42,6 +69,7 @@ void ChartWidget::initializeChart() {
     m_ecgAxisY->setTitleText("幅值 (mV)");
     m_ecgAxisY->setRange(-2, 2);
     
+    qDebug() << "ChartWidget::initializeChart - Creating trend series...";
     // 初始化趋势图序列
     m_temperatureSeries = new QSplineSeries();
     m_temperatureSeries->setName("体温");
@@ -52,23 +80,34 @@ void ChartWidget::initializeChart() {
     m_oxygenSeries = new QSplineSeries();
     m_oxygenSeries->setName("血氧");
     
+    qDebug() << "ChartWidget::initializeChart - Creating trend axes...";
     m_trendAxisX = new QDateTimeAxis();
     m_trendAxisX->setFormat("hh:mm:ss");
     m_trendAxisX->setTitleText("时间");
     
     m_trendAxisY = new QValueAxis();
     
+    qDebug() << "ChartWidget::initializeChart - Calling setupECGChart...";
     setupECGChart();
+    qDebug() << "ChartWidget::initializeChart - Complete";
 }
 
 void ChartWidget::setupECGChart() {
+    qDebug() << "ChartWidget::setupECGChart - Start";
+    
+    qDebug() << "ChartWidget::setupECGChart - Removing all series...";
     m_chart->removeAllSeries();
     
+    qDebug() << "ChartWidget::setupECGChart - Adding ECG series...";
     m_chart->addSeries(m_ecgSeries);
+    
+    qDebug() << "ChartWidget::setupECGChart - Setting axes...";
     m_chart->setAxisX(m_ecgAxisX, m_ecgSeries);
     m_chart->setAxisY(m_ecgAxisY, m_ecgSeries);
     
+    qDebug() << "ChartWidget::setupECGChart - Setting title...";
     m_chart->setTitle("实时心电图波形");
+    qDebug() << "ChartWidget::setupECGChart - Complete";
 }
 
 void ChartWidget::setupTrendChart() {

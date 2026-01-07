@@ -1,5 +1,4 @@
 @echo off
-chcp 65001 >nul 2>&1
 echo.
 echo ========================================
 echo    ECG 监护系统 - 启动菜单
@@ -7,38 +6,23 @@ echo ========================================
 echo.
 echo 请选择操作:
 echo.
-echo  [1] 运行 ECG 应用程序
-echo  [2] 使用 Qt Creator 打开项目
-echo  [3] 编译项目 (MinGW)
-echo  [4] 启动测试环境 (MQTT + 模拟器 + 应用)
-echo  [5] 仅启动 MQTT Broker
-echo  [6] 仅启动数据模拟器
-echo  [7] 查看项目文档
+echo  [1] 使用 Qt Creator 打开项目 (推荐)
+echo  [2] 编译项目 (命令行)
+echo  [3] 启动测试环境 (MQTT + 模拟器 + 应用)
+echo  [4] 仅启动 MQTT Broker
+echo  [5] 仅启动数据模拟器
+echo  [6] 查看项目文档
 echo  [0] 退出
 echo.
-choice /C 12345670 /N /M "请输入选项 (1-7 或 0): "
+choice /C 1234560 /N /M "请输入选项 (1-6 或 0): "
 
-if errorlevel 8 goto :exit
-if errorlevel 7 goto :docs
-if errorlevel 6 goto :simulator
-if errorlevel 5 goto :mqtt
-if errorlevel 4 goto :test_env
-if errorlevel 3 goto :compile
-if errorlevel 2 goto :qtcreator
-if errorlevel 1 goto :run_app
-
-:run_app
-echo.
-echo 正在启动 ECG 应用程序...
-if exist "%~dp0build\debug\ecg_app.exe" (
-    start "" "%~dp0build\debug\ecg_app.exe"
-    echo [OK] ECG 应用程序已启动
-) else (
-    echo [!] 未找到可执行文件
-    echo     请先编译项目 (选项 3)
-)
-timeout /t 2 >nul
-goto :menu
+if errorlevel 7 goto :exit
+if errorlevel 6 goto :docs
+if errorlevel 5 goto :simulator
+if errorlevel 4 goto :mqtt
+if errorlevel 3 goto :test_env
+if errorlevel 2 goto :compile
+if errorlevel 1 goto :qtcreator
 
 :qtcreator
 echo.
@@ -55,32 +39,13 @@ if %errorlevel% neq 0 (
     goto :menu
 )
 start qtcreator "%~dp0ecg_app.pro"
-echo [OK] Qt Creator 已启动
+echo [✓] Qt Creator 已启动
 timeout /t 2 >nul
 goto :menu
 
 :compile
 echo.
-echo 正在编译项目...
-echo.
-set PATH=D:\qt-everywhere-src-6.9.3\qt\6.10.1\mingw_64\bin;D:\qt-everywhere-src-6.9.3\qt\Tools\mingw1310_64\bin;%PATH%
-cd /d "%~dp0build"
-echo [1/2] 编译中...
-mingw32-make -j4
-if %errorlevel% neq 0 (
-    echo [!] 编译失败
-    pause
-    cd /d "%~dp0"
-    goto :menu
-)
-echo.
-echo [2/2] 部署 Qt 依赖库...
-cd /d "%~dp0build\debug"
-windeployqt.exe ecg_app.exe >nul 2>&1
-echo.
-echo [OK] 编译完成！
-echo     可执行文件: %~dp0build\debug\ecg_app.exe
-cd /d "%~dp0"
+call "%~dp0scripts\build_windows.bat"
 pause
 goto :menu
 
@@ -100,7 +65,7 @@ if %errorlevel% neq 0 (
     goto :menu
 )
 start "MQTT Broker - Mosquitto" mosquitto -v
-echo [OK] MQTT Broker 已在新窗口启动
+echo [✓] MQTT Broker 已在新窗口启动
 timeout /t 2 >nul
 goto :menu
 
@@ -115,7 +80,7 @@ if %errorlevel% neq 0 (
 )
 cd /d "%~dp0scripts"
 start "ECG 数据模拟器" python mqtt_simulator.py
-echo [OK] 数据模拟器已在新窗口启动
+echo [✓] 数据模拟器已在新窗口启动
 timeout /t 2 >nul
 cd /d "%~dp0"
 goto :menu

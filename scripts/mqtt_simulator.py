@@ -6,6 +6,7 @@ MQTT测试工具 - 模拟ECG设备发送数据
 """
 
 import paho.mqtt.client as mqtt
+from paho.mqtt.client import CallbackAPIVersion
 import json
 import time
 import random
@@ -13,7 +14,7 @@ import math
 from datetime import datetime
 
 # MQTT配置
-MQTT_BROKER = "localhost"
+MQTT_BROKER = "47.115.148.200"
 MQTT_PORT = 1883
 MQTT_TOPIC_VITAL = "ecg/vitalsign"
 MQTT_TOPIC_ALARM = "ecg/alarm"
@@ -71,14 +72,14 @@ def generate_alarm(alarm_type=None):
     }
     return alarm
 
-def on_connect(client, userdata, flags, rc):
+def on_connect(client, userdata, flags, reason_code, properties):
     """MQTT连接回调"""
-    if rc == 0:
+    if reason_code == 0:
         print(f"✓ 已连接到MQTT Broker: {MQTT_BROKER}:{MQTT_PORT}")
     else:
-        print(f"✗ 连接失败，返回码: {rc}")
+        print(f"✗ 连接失败，返回码: {reason_code}")
 
-def on_publish(client, userdata, mid):
+def on_publish(client, userdata, mid, reason_code, properties):
     """MQTT发布回调"""
     pass
 
@@ -89,7 +90,7 @@ def main():
     print("=" * 60)
     
     # 创建MQTT客户端
-    client = mqtt.Client("ECG_Simulator")
+    client = mqtt.Client(CallbackAPIVersion.VERSION2, "ECG_Simulator")
     client.on_connect = on_connect
     client.on_publish = on_publish
     
